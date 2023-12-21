@@ -1,0 +1,28 @@
+<resources>
+    <!-- Base application theme. -->
+    <style name="Base.Theme.RadioAnimu_new" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/purple</item>
+        <item name="colorPrimaryVariant">@color/dark_purple</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/green</item>
+    </style>
+
+    <style name="Base.Theme.SplashScreen.RadioAnimu_new" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/purple</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/cropped_icon_a</item>
+        <item name="windowSplashScreenAnimationDuration">5000</item>
+        <item name="postSplashScreenTheme">@style/Base.Theme.RadioAnimu_new</item>
+    </style>
+
+    <style name="ToolbarColor" parent="Base.Theme.RadioAnimu_new">
+        <item name="android:textColorSecondary">?attr/colorSecondary</item>
+    </style>
+
+    <style name="ToolbarPopupTheme" parent="Theme.AppCompat.Light">
+        <item name="android:colorBackground">@color/dark_purple</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:buttonTint">@color/green</item>
+
+    </style>
+
+</resources>
