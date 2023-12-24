@@ -5,6 +5,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
+import br.com.richardnatan.radioanimu.R
 import br.com.richardnatan.radioanimu.data.MusicCallback
 import br.com.richardnatan.radioanimu.data.MusicDataSource
 import br.com.richardnatan.radioanimu.data.UnixCallback
@@ -12,6 +13,7 @@ import br.com.richardnatan.radioanimu.data.UnixDataSource
 import br.com.richardnatan.radioanimu.model.ApiResponse
 import br.com.richardnatan.radioanimu.model.Music
 import br.com.richardnatan.radioanimu.view.HomeFragment
+import com.squareup.picasso.Picasso
 import java.util.Timer
 import kotlin.concurrent.schedule
 
@@ -75,13 +77,14 @@ class HomePresenter(
         val music = Music(
             response.music.name,
             response.music.author,
-            response.music.imageUrl,
+            response.music.artworks,
             response.music.timeStart,
             response.music.duration
         )
-
         currentMusic = music
         getCurrentUnix()
+
+        Picasso.get().load(music.artworks?.large).into(view.imageMusic)
         view.updateMusic(music)
     }
 

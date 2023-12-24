@@ -22,7 +22,7 @@ class HomeFragment : Fragment() {
     private lateinit var progressBar: ProgressBar
     private lateinit var progressBarHorizontal: ProgressBar
     private lateinit var buttonPlay: ImageView
-    private lateinit var imageMusic: ImageView
+    lateinit var imageMusic: ImageView
     private lateinit var textMusicName: TextView
     private lateinit var textMusicAuthor: TextView
 
