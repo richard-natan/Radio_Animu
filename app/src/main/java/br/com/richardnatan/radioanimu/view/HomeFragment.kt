@@ -20,6 +20,7 @@ class HomeFragment : Fragment() {
 
     private lateinit var presenter: HomePresenter
     private lateinit var progressBar: ProgressBar
+    private lateinit var progressBarHorizontal: ProgressBar
     private lateinit var buttonPlay: ImageView
     private lateinit var imageMusic: ImageView
     private lateinit var textMusicName: TextView
@@ -48,6 +49,7 @@ class HomeFragment : Fragment() {
         textMusicName.isSelected = true
         textMusicAuthor = view.findViewById(R.id.text_music_author)
         progressBar = view.findViewById(R.id.progress_bar)
+        progressBarHorizontal = view.findViewById(R.id.progress_bar_horizontal)
 
 
         presenter.startRadio()
@@ -87,6 +89,11 @@ class HomeFragment : Fragment() {
     fun updateMusic(response: Music) {
         textMusicName.text = response.name
         textMusicAuthor.text = response.author
+    }
+
+    fun updateProgressBar(response: Int) {
+        progressBarHorizontal.max = 100
+        progressBarHorizontal.progress = response
     }
 
 }

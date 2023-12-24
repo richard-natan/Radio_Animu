@@ -23,6 +23,9 @@ class HomePresenter(
 
     private var exoPlayer: ExoPlayer = ExoPlayer.Builder(view.requireContext()).build()
     private lateinit var currentMusic: Music
+    private var currentMusicTimerIsRunning: Boolean = false
+    private var progressBarTimerIsRunning: Boolean = false
+    private var lastCurrentTime: Long = 0
 
     fun startRadio() {
         view.showProgressBar()
@@ -59,6 +62,10 @@ class HomePresenter(
         dataSource.getCurrentMusic(this)
     }
 
+    private fun getCurrentUnix() {
+        unixDataSource.getCurrentUnix(this)
+    }
+
     private fun retryGetCurrentMusic() {
         dataSource.getCurrentMusic(this)
     }
@@ -74,35 +81,61 @@ class HomePresenter(
         )
 
         currentMusic = music
-        unixDataSource.getCurrentUnix(this)
+        getCurrentUnix()
         view.updateMusic(music)
     }
 
     private fun calculateMusicTime(timeStart: Long, duration: Long, currentTime: Long) {
-        val musicEndTime = timeStart + duration
-        val currentTimeInMillis = currentTime * 1000
+        if (!currentMusicTimerIsRunning) {
+            val musicEndTime = timeStart + duration
+            val currentTimeInMillis = currentTime * 1000
+            val timeEnd = musicEndTime - currentTimeInMillis
+            lastCurrentTime = currentTimeInMillis
 
+            if (timeEnd <= 0) {
+                retryGetCurrentMusic()
+                return
+            }
 
-        val timer = Timer()
-
-        if (musicEndTime - currentTimeInMillis <= 0) {
-            retryGetCurrentMusic()
-            return
-        }
-
-        Log.i("TAG", "calculateMusicTime: INICIOU O TIMER")
-        timer.schedule(musicEndTime - currentTimeInMillis) {
-            Log.i("TAG", "calculateMusicTime: EXECUTOU O TIMER")
-            Handler(Looper.getMainLooper()).post {
-                view.clearTexts()
-                getCurrentMusic()
+            val timer = Timer()
+            Log.i("calculateMusicTime", "INICIOU O TIMER")
+            currentMusicTimerIsRunning = true
+            timer.schedule(timeEnd) {
+                Log.i("calculateMusicTime", "EXECUTOU O TIMER")
+                currentMusicTimerIsRunning = false
+                Handler(Looper.getMainLooper()).post {
+                    view.clearTexts()
+                    getCurrentMusic()
+                }
             }
         }
+    }
+
+    private fun progressBarPercent(currentTime: Long) {
+        progressBarTimerIsRunning = true
+        val musicElapsedTime = currentTime - (currentMusic.timeStart ?: 0)
+        val percent = (musicElapsedTime.toFloat() / (currentMusic.duration ?: 0)) * 100
+
+        val timer = Timer()
+        timer.schedule(2000) {
+            Log.i("TAG", "progressBarPercent: ATUALIZOU A BARRA")
+            Handler(Looper.getMainLooper()).post {
+                view.updateProgressBar(percent.toInt())
+                lastCurrentTime += 2000
+                progressBarPercent(lastCurrentTime)
+            }
+        }
+
+
     }
 
     // UNIX DATASOURCE
     override fun onSuccess(response: Long) {
         calculateMusicTime(currentMusic.timeStart!!, currentMusic.duration!!, response)
+
+        if (!progressBarTimerIsRunning) {
+            progressBarPercent(lastCurrentTime)
+        }
     }
 
 
@@ -113,9 +146,6 @@ class HomePresenter(
     override fun onComplete() {
         view.hideProgressBar()
     }
-
-
-
 
 
 }
