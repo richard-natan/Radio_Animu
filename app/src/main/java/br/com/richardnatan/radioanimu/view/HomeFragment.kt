@@ -1,28 +1,37 @@
 package br.com.richardnatan.radioanimu.view
 
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.palette.graphics.Palette
 import br.com.richardnatan.radioanimu.R
 import br.com.richardnatan.radioanimu.model.Music
 import br.com.richardnatan.radioanimu.presenter.HomePresenter
+import com.google.android.material.card.MaterialCardView
 
 
 class HomeFragment : Fragment() {
     lateinit var exoPlayer: ExoPlayer
 
     private lateinit var presenter: HomePresenter
+
+    private lateinit var mainContainer: LinearLayout
+    private lateinit var musicDetailsContainer: ConstraintLayout
     private lateinit var progressBar: ProgressBar
     private lateinit var progressBarHorizontal: ProgressBar
     private lateinit var buttonPlay: ImageView
     lateinit var imageMusic: ImageView
+    private lateinit var imageMusicContainer: MaterialCardView
     private lateinit var textMusicName: TextView
     private lateinit var textMusicAuthor: TextView
 
@@ -42,6 +51,9 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        mainContainer = view.findViewById(R.id.main_container)
+        musicDetailsContainer = view.findViewById(R.id.music_details_container)
+        imageMusicContainer = view.findViewById(R.id.image_music_container)
         buttonPlay = view.findViewById(R.id.button_play)
         imageMusic = view.findViewById(R.id.image_music)
         textMusicName = view.findViewById(R.id.text_music_name)
@@ -89,6 +101,16 @@ class HomeFragment : Fragment() {
     fun updateMusic(response: Music) {
         textMusicName.text = response.name
         textMusicAuthor.text = response.author
+    }
+
+    fun updateMusicImage(response: Bitmap) {
+        imageMusic.setImageBitmap(response)
+    }
+
+    fun updateUiColors(response: Palette) {
+        mainContainer.setBackgroundColor(response.lightVibrantSwatch?.rgb ?: R.color.green)
+        imageMusicContainer.strokeColor = response.darkVibrantSwatch?.rgb ?: R.color.purple
+        musicDetailsContainer.setBackgroundColor(response.darkVibrantSwatch?.rgb ?: R.color.purple)
     }
 
     fun updateProgressBar(response: Int) {
