@@ -2,13 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/colorPrimary"
+    android:background="@color/dark_purple"
     android:padding="35dp">
 
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:src="@drawable/animu_logo"
+        android:layout_height="80dp"
+        android:src="@drawable/animu_logo_default"
         android:contentDescription="logo" />
 
 </LinearLayout>

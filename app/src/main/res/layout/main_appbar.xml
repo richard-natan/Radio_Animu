@@ -15,7 +15,15 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:theme="@style/ToolbarColor"
-            app:popupTheme="@style/ToolbarPopupTheme" />
+            app:popupTheme="@style/ToolbarPopupTheme">
+
+            <ImageView
+                android:layout_width="130dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/animu_logo_default"
+                android:layout_gravity="center"/>
+
+        </androidx.appcompat.widget.Toolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
     

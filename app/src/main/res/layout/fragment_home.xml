@@ -97,7 +97,8 @@
             android:id="@+id/button_play"
             android:layout_width="150dp"
             android:layout_height="150dp"
-            android:src="@drawable/button_play_states" />
+            android:src="@drawable/button_play_states"
+            app:tint="@color/purple" />
 
 
     </LinearLayout>

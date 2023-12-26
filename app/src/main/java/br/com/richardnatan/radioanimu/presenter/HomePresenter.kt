@@ -117,7 +117,7 @@ class HomePresenter(
         )
         currentMusic = music
 
-        getCurrentMusicImage(music.artworks?.large)
+        getCurrentMusicImage(music.artworks?.medium)
         getCurrentUnix()
         view.updateMusic(music)
     }

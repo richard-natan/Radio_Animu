@@ -111,6 +111,7 @@ class HomeFragment : Fragment() {
         mainContainer.setBackgroundColor(response.lightVibrantSwatch?.rgb ?: R.color.green)
         imageMusicContainer.strokeColor = response.darkVibrantSwatch?.rgb ?: R.color.purple
         musicDetailsContainer.setBackgroundColor(response.darkVibrantSwatch?.rgb ?: R.color.purple)
+        buttonPlay.setColorFilter(response.darkVibrantSwatch?.rgb ?: R.color.green)
     }
 
     fun updateProgressBar(response: Int) {
