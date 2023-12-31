@@ -5,15 +5,19 @@ import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.View
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.palette.graphics.Palette
 import br.com.richardnatan.radioanimu.R
+import br.com.richardnatan.radioanimu.data.AnimuDJCallback
+import br.com.richardnatan.radioanimu.data.AnimuDjDataSource
 import br.com.richardnatan.radioanimu.data.MusicCallback
 import br.com.richardnatan.radioanimu.data.MusicDataSource
 import br.com.richardnatan.radioanimu.data.UnixCallback
 import br.com.richardnatan.radioanimu.data.UnixDataSource
-import br.com.richardnatan.radioanimu.model.ApiResponse
+import br.com.richardnatan.radioanimu.model.AnimuApiResponse
+import br.com.richardnatan.radioanimu.model.AnimuDjResponse
 import br.com.richardnatan.radioanimu.model.Music
 import br.com.richardnatan.radioanimu.view.HomeFragment
 import com.squareup.picasso.Picasso
@@ -24,13 +28,15 @@ import kotlin.concurrent.schedule
 class HomePresenter(
     private val view: HomeFragment,
     private val dataSource: MusicDataSource = MusicDataSource(),
+    private val animuDjDataSource: AnimuDjDataSource = AnimuDjDataSource(),
     private val unixDataSource: UnixDataSource = UnixDataSource()
-) : MusicCallback, UnixCallback {
+) : MusicCallback, UnixCallback, AnimuDJCallback {
 
     private var exoPlayer: ExoPlayer = ExoPlayer.Builder(view.requireContext()).build()
     private lateinit var currentMusic: Music
     private var currentMusicTimerIsRunning: Boolean = false
     private var progressBarTimerIsRunning: Boolean = false
+    private var containerLoopIsRunning: Boolean = false
     private var lastCurrentTime: Long = 0
 
     fun startRadio() {
@@ -55,6 +61,7 @@ class HomePresenter(
             return
         }
 
+        getCurrentMusic()
         startRadio()
     }
 
@@ -68,12 +75,18 @@ class HomePresenter(
         dataSource.getCurrentMusic(this)
     }
 
+    fun getCurrentDj() {
+        animuDjDataSource.getCurrentDj(this)
+    }
+
     private fun getCurrentMusicImage(url: String?) {
         val target = object : Target {
             override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
                 if (bitmap == null) {
                     view.imageMusic.setImageResource(R.drawable.animu_other_logo)
+                    Log.i("getCurrentMusicImage", "onBitmapLoaded: IMAGE NOT FOUND")
                 } else {
+                    Log.i("getCurrentMusicImage", "onBitmapLoaded: IMAGE FOUND")
                     view.updateMusicImage(bitmap)
                     getMusicImagePalette(bitmap)
                 }
@@ -93,6 +106,7 @@ class HomePresenter(
     }
 
     private fun getMusicImagePalette(image: Bitmap) {
+        Log.i("getMusicImagePalette", "onBitmapLoaded: GETTING PALETTE")
         val palette = Palette.from(image).generate()
 
         view.updateUiColors(palette)
@@ -107,7 +121,7 @@ class HomePresenter(
     }
 
     // Music DataSource
-    override fun onSuccess(response: ApiResponse) {
+    override fun onSuccess(response: AnimuApiResponse) {
         val music = Music(
             response.music.name,
             response.music.author,
@@ -119,6 +133,9 @@ class HomePresenter(
 
         getCurrentMusicImage(music.artworks?.medium)
         getCurrentUnix()
+        getCurrentDj()
+
+        view.updateListeners(response.listeners)
         view.updateMusic(music)
     }
 
@@ -135,10 +152,10 @@ class HomePresenter(
             }
 
             val timer = Timer()
-            Log.i("calculateMusicTime", "INICIOU O TIMER")
+            Log.i("calculateMusicTime", "START TIMER")
             currentMusicTimerIsRunning = true
             timer.schedule(timeEnd) {
-                Log.i("calculateMusicTime", "EXECUTOU O TIMER")
+                Log.i("calculateMusicTime", "TIMER DONE")
                 currentMusicTimerIsRunning = false
                 Handler(Looper.getMainLooper()).post {
                     view.clearTexts()
@@ -155,7 +172,7 @@ class HomePresenter(
 
         val timer = Timer()
         timer.schedule(2000) {
-            Log.i("TAG", "progressBarPercent: ATUALIZOU A BARRA")
+            Log.i("progressBarPercent", "progressBarPercent: PROGRESSBAR UPDATE")
             Handler(Looper.getMainLooper()).post {
                 view.updateProgressBar(percent.toInt())
                 lastCurrentTime += 2000
@@ -164,6 +181,43 @@ class HomePresenter(
         }
 
 
+    }
+
+    // DJ DATASOURCE
+    override fun onSuccess(response: AnimuDjResponse) {
+        view.updateDj(response)
+
+        if (response.announcer != "Haruka Yuki") {
+            Picasso.get().load(response.image).into(view.imageDj)
+        } else {
+            view.imageDj.setImageResource(R.drawable.haru_chan_operator_dj)
+        }
+
+        if (!containerLoopIsRunning) {
+            startContainerLoop(20000)
+        }
+    }
+
+    private fun startContainerLoop(delay: Long) {
+        containerLoopIsRunning = true
+
+        val timer = Timer()
+        timer.schedule(delay) {
+            Log.i("progressBarPercent", "progressBarPercent: PROGRESSBAR UPDATE")
+            Handler(Looper.getMainLooper()).post {
+                if (view.musicDetailsContainer.visibility == View.VISIBLE) {
+                    // DJ VISIBLE
+                    view.musicDetailsContainer.visibility = View.INVISIBLE
+                    view.djContainer.visibility = View.VISIBLE
+                    startContainerLoop(5000)
+                } else {
+                    // MUSIC DETAIL VISIBLE
+                    view.musicDetailsContainer.visibility = View.VISIBLE
+                    view.djContainer.visibility = View.INVISIBLE
+                    startContainerLoop(20000)
+                }
+            }
+        }
     }
 
     // UNIX DATASOURCE

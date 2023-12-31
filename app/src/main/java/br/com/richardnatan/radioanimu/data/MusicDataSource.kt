@@ -2,7 +2,7 @@ package br.com.richardnatan.radioanimu.data
 
 import android.os.Handler
 import android.os.Looper
-import br.com.richardnatan.radioanimu.model.ApiResponse
+import br.com.richardnatan.radioanimu.model.AnimuApiResponse
 import br.com.richardnatan.radioanimu.model.Music
 import retrofit2.Call
 import retrofit2.Callback
@@ -14,22 +14,23 @@ class MusicDataSource {
         Handler(Looper.getMainLooper()).post {
             HTTPClient.retrofitAnimu().create(AnimuAPI::class.java)
                 .findMusic()
-                .enqueue(object : Callback<ApiResponse> {
+                .enqueue(object : Callback<AnimuApiResponse> {
                     override fun onResponse(
-                        call: Call<ApiResponse>,
-                        response: Response<ApiResponse>
+                        call: Call<AnimuApiResponse>,
+                        response: Response<AnimuApiResponse>
                     ) {
                         if (response.isSuccessful) {
                             val responseBody = response.body()
                             callback.onSuccess(
-                                responseBody ?: ApiResponse(
+                                responseBody ?: AnimuApiResponse(
                                     Music(
                                         null,
                                         null,
                                         null,
                                         null,
                                         null
-                                    )
+                                    ),
+                                    0
                                 )
                             )
                         } else {
@@ -39,7 +40,7 @@ class MusicDataSource {
                         callback.onComplete()
                     }
 
-                    override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                    override fun onFailure(call: Call<AnimuApiResponse>, t: Throwable) {
                         callback.onError(t.message ?: "ERRO INTERNO")
                         callback.onComplete()
                     }

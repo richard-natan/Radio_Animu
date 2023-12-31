@@ -1,10 +1,10 @@
 package br.com.richardnatan.radioanimu.data
 
-import br.com.richardnatan.radioanimu.model.ApiResponse
+import br.com.richardnatan.radioanimu.model.AnimuApiResponse
 
 interface MusicCallback {
 
-    fun onSuccess(response: ApiResponse)
+    fun onSuccess(response: AnimuApiResponse)
 
     fun onError(response: String)
 

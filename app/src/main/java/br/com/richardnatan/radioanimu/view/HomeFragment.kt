@@ -11,13 +11,17 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.graphics.ColorUtils
 import androidx.fragment.app.Fragment
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.palette.graphics.Palette
 import br.com.richardnatan.radioanimu.R
+import br.com.richardnatan.radioanimu.model.AnimuDjResponse
 import br.com.richardnatan.radioanimu.model.Music
 import br.com.richardnatan.radioanimu.presenter.HomePresenter
 import com.google.android.material.card.MaterialCardView
+import com.squareup.picasso.Picasso
+import org.w3c.dom.Text
 
 
 class HomeFragment : Fragment() {
@@ -26,11 +30,16 @@ class HomeFragment : Fragment() {
     private lateinit var presenter: HomePresenter
 
     private lateinit var mainContainer: LinearLayout
-    private lateinit var musicDetailsContainer: ConstraintLayout
+    lateinit var musicDetailsContainer: ConstraintLayout
+    lateinit var musicContainer: ConstraintLayout
+    lateinit var djContainer: LinearLayout
     private lateinit var progressBar: ProgressBar
     private lateinit var progressBarHorizontal: ProgressBar
     private lateinit var buttonPlay: ImageView
     lateinit var imageMusic: ImageView
+    private lateinit var textListeners: TextView
+    lateinit var imageDj: ImageView
+    private lateinit var textDjAnnouncer: TextView
     private lateinit var imageMusicContainer: MaterialCardView
     private lateinit var textMusicName: TextView
     private lateinit var textMusicAuthor: TextView
@@ -53,9 +62,14 @@ class HomeFragment : Fragment() {
 
         mainContainer = view.findViewById(R.id.main_container)
         musicDetailsContainer = view.findViewById(R.id.music_details_container)
+        musicContainer = view.findViewById(R.id.music_container)
+        djContainer = view.findViewById(R.id.dj_container)
+        imageDj = view.findViewById(R.id.image_dj)
+        textDjAnnouncer = view.findViewById(R.id.text_dj_announcer)
         imageMusicContainer = view.findViewById(R.id.image_music_container)
         buttonPlay = view.findViewById(R.id.button_play)
         imageMusic = view.findViewById(R.id.image_music)
+        textListeners = view.findViewById(R.id.text_listeners)
         textMusicName = view.findViewById(R.id.text_music_name)
         textMusicName.setSingleLine()
         textMusicName.isSelected = true
@@ -103,14 +117,23 @@ class HomeFragment : Fragment() {
         textMusicAuthor.text = response.author
     }
 
+    fun updateListeners(response: Int) {
+        textListeners.text = "Ouvintes: $response"
+    }
+
     fun updateMusicImage(response: Bitmap) {
         imageMusic.setImageBitmap(response)
     }
 
+    fun updateDj(response: AnimuDjResponse) {
+        textDjAnnouncer.text = response.announcer
+    }
+
     fun updateUiColors(response: Palette) {
         mainContainer.setBackgroundColor(response.lightVibrantSwatch?.rgb ?: R.color.green)
-        imageMusicContainer.strokeColor = response.darkVibrantSwatch?.rgb ?: R.color.purple
-        musicDetailsContainer.setBackgroundColor(response.darkVibrantSwatch?.rgb ?: R.color.purple)
+        imageMusicContainer.strokeColor = ColorUtils.setAlphaComponent(response.darkVibrantSwatch?.rgb ?: response.darkMutedSwatch?.rgb ?: resources.getColor(R.color.purple), 255 )
+        musicContainer.setBackgroundColor(response.darkVibrantSwatch?.rgb ?: R.color.purple)
+        textListeners.setBackgroundColor(response.darkVibrantSwatch?.rgb ?: R.color.purple)
         buttonPlay.setColorFilter(response.darkVibrantSwatch?.rgb ?: R.color.green)
     }
 
