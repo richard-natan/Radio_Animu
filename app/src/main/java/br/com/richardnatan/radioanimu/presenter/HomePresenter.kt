@@ -5,7 +5,6 @@ import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.View
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.palette.graphics.Palette
@@ -75,7 +74,7 @@ class HomePresenter(
         dataSource.getCurrentMusic(this)
     }
 
-    fun getCurrentDj() {
+    private fun getCurrentDj() {
         animuDjDataSource.getCurrentDj(this)
     }
 
@@ -83,7 +82,7 @@ class HomePresenter(
         val target = object : Target {
             override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
                 if (bitmap == null) {
-                    view.imageMusic.setImageResource(R.drawable.animu_other_logo)
+                    view.updateMusicImage(R.drawable.animu_other_logo)
                     Log.i("getCurrentMusicImage", "onBitmapLoaded: IMAGE NOT FOUND")
                 } else {
                     Log.i("getCurrentMusicImage", "onBitmapLoaded: IMAGE FOUND")
@@ -93,7 +92,6 @@ class HomePresenter(
             }
 
             override fun onBitmapFailed(e: Exception?, errorDrawable: Drawable?) {
-                view.imageMusic.setImageResource(R.drawable.animu_other_logo)
                 retryGetCurrentMusic()
             }
 
@@ -188,33 +186,45 @@ class HomePresenter(
         view.updateDj(response)
 
         if (response.announcer != "Haruka Yuki") {
-            Picasso.get().load(response.image).into(view.imageDj)
+            val target = object : Target {
+                override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
+                    view.updateDjImageBitmap(bitmap!!)
+                }
+
+                override fun onBitmapFailed(e: java.lang.Exception?, errorDrawable: Drawable?) {
+                    view.updateDjImage(R.drawable.haru_chan_operator_dj)
+                }
+
+                override fun onPrepareLoad(placeHolderDrawable: Drawable?) {
+                }
+
+            }
+
+            Picasso.get().load(response.image).into(target)
         } else {
-            view.imageDj.setImageResource(R.drawable.haru_chan_operator_dj)
+            view.updateDjImage(R.drawable.haru_chan_operator_dj)
         }
 
         if (!containerLoopIsRunning) {
-            startContainerLoop(20000)
+            startContainerLoop(20000, false)
         }
     }
 
-    private fun startContainerLoop(delay: Long) {
+    private fun startContainerLoop(delay: Long, lastVisible: Boolean) {
         containerLoopIsRunning = true
 
         val timer = Timer()
         timer.schedule(delay) {
             Log.i("progressBarPercent", "progressBarPercent: PROGRESSBAR UPDATE")
             Handler(Looper.getMainLooper()).post {
-                if (view.musicDetailsContainer.visibility == View.VISIBLE) {
+                if (!lastVisible) {
                     // DJ VISIBLE
-                    view.musicDetailsContainer.visibility = View.INVISIBLE
-                    view.djContainer.visibility = View.VISIBLE
-                    startContainerLoop(5000)
+                    view.toggleDjVisibility(true)
+                    startContainerLoop(5000, true)
                 } else {
                     // MUSIC DETAIL VISIBLE
-                    view.musicDetailsContainer.visibility = View.VISIBLE
-                    view.djContainer.visibility = View.INVISIBLE
-                    startContainerLoop(20000)
+                    view.toggleDjVisibility(false)
+                    startContainerLoop(20000, false)
                 }
             }
         }
